@@ -1,0 +1,93 @@
+componentDiagram
+    %% Academic Style UML Component Diagram for TEDE_HRMS
+    %% Incorporating AI Features (Staff Forecasting & Predictive Analytics)
+
+    package "Presentation Layer" {
+        component [Web Client] as Client
+        note right of Client
+            React.js SPA
+            Response Web UI
+        end note
+    }
+
+    package "Application Layer" {
+        component [API Gateway] as Gateway
+        
+        %% Core HR Components
+        component "HR Management Subsystem" as HR_System {
+            component [Employee Manager] as EmpMgr
+            component [Leave Manager] as LeaveMgr
+            component [Performance Manager] as PerfMgr
+        }
+
+        %% AI & Analytics Components - Detailed as requested
+        component "Intelligent Analytics Subsystem" as AI_System {
+            component [Forecast Controller] as ForecastCtrl
+            component [Prediction Engine] as Predictor
+            component [Training Data Processor] as DataProc
+            
+            note right of Predictor
+                Linear Regression Model
+                (simple-statistics)
+            end note
+        }
+        
+        interface "REST API" as I_REST
+        interface "IAuth" as I_Auth
+    }
+
+    package "Security & Infrastructure" {
+        component [Firewall] as FW
+        component [SSL/TLS Terminator] as SSL
+        component [SSH Access Control] as SSH_Auth
+    }
+
+    package "Data Layer" {
+        component [MySQL Database] as DB
+        interface "SQL Interface" as I_SQL
+    }
+
+    %% Relationships and Interfaces (Ball and Socket Notation)
+
+    %% Admin Access via SSH
+    note top of SSH_Auth: Admin Server Access \n(RSA Keys, Port 22)
+    SSH_Auth --( I_System_Access
+    
+    %% Client to Gateway (Secured)
+    Client --> FW : HTTPS / 443
+    FW --> SSL : Encrypted traffic
+    SSL --( I_REST : Decrypted traffic
+    I_REST )-- Gateway
+
+    %% Gateway to Subsystems
+    Gateway --> HR_System
+    Gateway --> AI_System
+
+    %% AI Subsystem Internal Flows
+    ForecastCtrl --> DataProc : Request Historical Data
+    DataProc --( I_SQL
+    
+    DataProc --> Predictor : Feed Training Data
+    Predictor --> ForecastCtrl : Return Forecast Model
+
+    %% AI dependencies on HR Data
+    AI_System ..> HR_System : Dependency (Employee Data)
+
+    %% Database Connections
+    HR_System --( I_SQL
+    ForecastCtrl --( I_SQL : Store Forecasts
+    I_SQL )-- DB
+
+    %% Detailed Breakdown of Interfaces
+    class I_REST {
+        <<Interface>>
+        +getForecasts()
+        +getEmployeeStats()
+    }
+    
+    class I_SQL {
+        <<Interface>>
+        +Select()
+        +Insert()
+        +Update()
+    }

@@ -1,0 +1,172 @@
+{
+    "sidebar": {
+        "dashboard": "Dashboard",
+        "employees": "Employees",
+        "attendance": "Attendance",
+        "leave": "Leave",
+        "recruitment": "Recruitment",
+        "performance": "Performance",
+        "training": "Training",
+        "academic": "Academic",
+        "disciplinary": "Disciplinary",
+        "documents": "Documents",
+        "payroll": "Payroll",
+        "housing": "Housing",
+        "separation": "Separation",
+        "reports": "Reports",
+        "settings": "Settings",
+        "myTeam": "My Team",
+        "leaveApprovals": "Leave Approvals",
+        "jobPostings": "Job Postings",
+        "candidates": "Candidates",
+        "myProfile": "My Profile",
+        "leaveRequest": "Leave Request",
+        "academicProfile": "Academic Profile",
+        "signOut": "Sign Out"
+    },
+    "topbar": {
+        "searchPlaceholder": "Search...",
+        "guest": "Guest",
+        "visitor": "Visitor"
+    },
+    "dashboard": {
+        "title": "Dashboard",
+        "account": "Account",
+        "welcomeBack": "Welcome back",
+        "refresh": "Refresh",
+        "refreshing": "Refreshing...",
+        "exportReport": "Export Report",
+        "exportFailed": "Export failed",
+        "retry": "Retry",
+        "aiInsights": "AI Strategic Insights",
+        "myAnnouncements": "My Announcements",
+        "systemActivity": "System Activity",
+        "noActivity": "No recent activity.",
+        "performanceStats": "Performance Stats",
+        "departmentAnalytics": "Department Analytics",
+        "personalStatsComingSoon": "Personal Stats Coming Soon"
+    },
+    "statsCard": {
+        "fromLastMonth": "from last month"
+    },
+    "chart": {
+        "failedLoad": "Failed to load chart data",
+        "noData": "No department data available."
+    },
+    "stats": {
+        "Total Employees": "Total Employees",
+        "Active Roles": "Active Roles",
+        "On Leave": "On Leave",
+        "Open Reqs": "Open Reqs",
+        "Pending Reviews": "Pending Reviews",
+        "Active Trainings": "Active Trainings",
+        "Academic Staff": "Academic Staff",
+        "Open Issues": "Open Issues",
+        "Total Count": "Total Count"
+    },
+    "employees": {
+        "title": "Employees",
+        "subtitle": "Manage your organization's workforce.",
+        "searchPlaceholder": "Search employees...",
+        "filter": "Filter",
+        "addEmployee": "Add Employee",
+        "employeeId": "Employee ID",
+        "name": "Name",
+        "department": "Department",
+        "role": "Role",
+        "status": "Status",
+        "actions": "Actions",
+        "view": "View"
+    },
+    "employeeForm": {
+        "newEmployee": "New Employee",
+        "editEmployee": "Edit Employee",
+        "newDesc": "Onboard a new staff member.",
+        "editDesc": "Update existing employee details.",
+        "cancel": "Cancel",
+        "save": "Save Employee",
+        "personalInfo": "Personal Information",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email Address",
+        "idNumber": "Employee ID",
+        "employmentDetails": "Employment Details",
+        "department": "Department",
+        "selectDepartment": "Select Department",
+        "role": "Role",
+        "selectRole": "Select Role",
+        "academic": "Academic",
+        "administrative": "Administrative",
+        "status": "Status",
+        "academicInfo": "Academic Information",
+        "academicRank": "Academic Rank",
+        "selectRank": "Select Rank"
+    },
+    "employeeProfile": {
+        "title": "Employee Profile",
+        "desc": "Manage employee details and records.",
+        "downloadCv": "Download CV",
+        "editProfile": "Edit Profile",
+        "tabs": {
+            "personalInfo": "Personal Info",
+            "academicProfile": "Academic Profile",
+            "employment": "Employment",
+            "documents": "Documents"
+        }
+    },
+    "leave": {
+        "title": "Leave Management",
+        "subtitle": "Manage leave requests and plan your time off.",
+        "requestLeave": "Request Leave",
+        "historyTitle": "My Leave History",
+        "type": "Type",
+        "dates": "Dates",
+        "days": "Days",
+        "reason": "Reason",
+        "status": "Status",
+        "to": "to",
+        "calendarTitle": "Academic Calendar",
+        "semesterBreak": "Semester Break Begins",
+        "noClasses": "No classes. Admin staff active.",
+        "classesResume": "Classes Resume",
+        "springSemester": "Spring semester start.",
+        "leaveNotice": "Leave requests during exam weeks (Jan 15-25) require Dean's approval.",
+        "months": {
+            "dec": "Dec",
+            "jan": "Jan"
+        }
+    },
+    "recruitment": {
+        "title": "Recruitment & Hiring",
+        "subtitle": "Manage vacancies, candidates, and hiring workflows.",
+        "postVacancy": "Post Vacancy",
+        "tabs": {
+            "jobs": "Job Postings",
+            "candidates": "Candidates",
+            "interviews": "Interviews",
+            "hiring": "Onboarding"
+        },
+        "activeVacancies": "Active Vacancies",
+        "searchPlaceholder": "Search jobs...",
+        "applicants": "Applicants",
+        "closing": "Closing",
+        "internal": "Internal",
+        "published": "Published",
+        "draft": "Draft",
+        "fullTime": "Full Time",
+        "contract": "Contract",
+        "noCandidates": "No candidates selected",
+        "selectJob": "Select a job posting to view applicants and shortlist candidates.",
+        "upcomingInterviews": "Upcoming Interviews",
+        "dec": "Dec",
+        "onboardingPipeline": "Onboarding Pipeline",
+        "viewChecklist": "View Checklist",
+        "offerAccepted": "Offer Accepted • Pending Documents"
+    },
+    "aiWidget": {
+        "smartPriority": "Smart Vacancy Priority",
+        "aiRanked": "AI ranked recruitment urgency",
+        "viewScoringModel": "View Scoring Model",
+        "score": "Score"
+    }
+}

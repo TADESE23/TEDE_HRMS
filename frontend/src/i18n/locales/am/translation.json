@@ -1,0 +1,172 @@
+{
+    "sidebar": {
+        "dashboard": "ዳሽቦርድ",
+        "employees": "ሠራተኞች",
+        "attendance": "ክትትል",
+        "leave": "ፈቃድ",
+        "recruitment": "ቅጥር",
+        "performance": "አፈጻጸም",
+        "training": "ስልጠና",
+        "academic": "አካዳሚክ",
+        "disciplinary": "ዲስፕሊን",
+        "documents": "ሰነዶች",
+        "payroll": "ደመወዝ",
+        "housing": "መኖሪያ ቤት",
+        "separation": "ስንብት",
+        "reports": "ሪፖርቶች",
+        "settings": "ቅንብሮች",
+        "myTeam": "የእኔ ቡድን",
+        "leaveApprovals": "የፈቃድ ማረጋገጫዎች",
+        "jobPostings": "የስራ ማስታወቂያዎች",
+        "candidates": "እጩዎች",
+        "myProfile": "የመገለጫዬ",
+        "leaveRequest": "የፈቃድ ጥያቄ",
+        "academicProfile": "የአካዳሚክ መገለጫ",
+        "signOut": "ውጣ"
+    },
+    "topbar": {
+        "searchPlaceholder": "ፈልግ...",
+        "guest": "እንግዳ",
+        "visitor": "ጎብኚ"
+    },
+    "dashboard": {
+        "title": "ዳሽቦርድ",
+        "account": "አካውንት",
+        "welcomeBack": "እንኳን ደህና መጡ",
+        "refresh": "ያድሱ",
+        "refreshing": "እያደሰ ነው...",
+        "exportReport": "ሪፖርት አውጣ",
+        "exportFailed": "ወደ ውጭ መላክ አልተሳካም",
+        "retry": "እንደገና ሞክር",
+        "aiInsights": "AI ስትራቴጂካዊ ግንዛቤዎች",
+        "myAnnouncements": "የእኔ ማስታወቂያዎች",
+        "systemActivity": "የስርዓት እንቅስቃሴ",
+        "noActivity": "ምንም የቅርብ ጊዜ እንቅስቃሴ የለም።",
+        "performanceStats": "የአፈጻጸም ስታትስቲክስ",
+        "departmentAnalytics": "የመምሪያ ትንታኔዎች",
+        "personalStatsComingSoon": "የግል ስታትስቲክስ በቅርቡ ይመጣል"
+    },
+    "statsCard": {
+        "fromLastMonth": "ካለፈው ወር ጀምሮ"
+    },
+    "chart": {
+        "failedLoad": "የገበታ ውሂብ መጫን አልተሳካም",
+        "noData": "ምንም የመምሪያ ውሂብ የለም።"
+    },
+    "stats": {
+        "Total Employees": "ጠቅላላ ሠራተኞች",
+        "Active Roles": "ንቁ ሚናዎች",
+        "On Leave": "በፈቃድ ላይ",
+        "Open Reqs": "ክፍት ስራዎች",
+        "Pending Reviews": "የሚጠባበቁ ግምገማዎች",
+        "Active Trainings": "ንቁ ስልጠናዎች",
+        "Academic Staff": "የአካዳሚክ ሠራተኞች",
+        "Open Issues": "ክፍት ጉዳዮች",
+        "Total Count": "ጠቅላላ ብዛት"
+    },
+    "employees": {
+        "title": "ሠራተኞች",
+        "subtitle": "የድርጅትዎን የሰው ኃይል ያስተዳድሩ።",
+        "searchPlaceholder": "ሠራተኞችን ይፈልጉ...",
+        "filter": "አጣራ",
+        "addEmployee": "ሠራተኛ አክል",
+        "employeeId": "የሠራተኛ መታወቂያ",
+        "name": "ስም",
+        "department": "ክፍል",
+        "role": "ሚና",
+        "status": "ሁኔታ",
+        "actions": "እርምጃዎች",
+        "view": "እይታ"
+    },
+    "employeeForm": {
+        "newEmployee": "አዲስ ሠራተኛ",
+        "editEmployee": "ሠራተኛን ያርትዑ",
+        "newDesc": "አዲስ ሠራተኛ ይመዝግቡ።",
+        "editDesc": "የነባር ሠራተኛ ዝርዝሮችን ያዘምኑ።",
+        "cancel": "ሰርዝ",
+        "save": "ሠራተኛን ያስቀምጡ",
+        "personalInfo": "የግል መረጃ",
+        "firstName": "የመጀመሪያ ስም",
+        "lastName": "የአያት ስም",
+        "email": "የኢሜይል አድራሻ",
+        "idNumber": "የሠራተኛ መታወቂያ",
+        "employmentDetails": "የሥራ ዝርዝሮች",
+        "department": "ክፍል",
+        "selectDepartment": "ክፍል ይምረጡ",
+        "role": "ሚና",
+        "selectRole": "ሚና ይምረጡ",
+        "academic": "አካዳሚክ",
+        "administrative": "አስተዳደራዊ",
+        "status": "ሁኔታ",
+        "academicInfo": "የአካዳሚክ መረጃ",
+        "academicRank": "የአካዳሚክ ማዕረግ",
+        "selectRank": "ማዕረግ ይምረጡ"
+    },
+    "employeeProfile": {
+        "title": "የሠራተኛ መገለጫ",
+        "desc": "የሠራተኛ ዝርዝሮችን እና መዝገቦችን ያስተዳድሩ።",
+        "downloadCv": "ሲቪ (CV) ያውርዱ",
+        "editProfile": "መገለጫን ያርትዑ",
+        "tabs": {
+            "personalInfo": "የግል መረጃ",
+            "academicProfile": "የአካዳሚክ መገለጫ",
+            "employment": "ቅጥር",
+            "documents": "ሰነዶች"
+        }
+    },
+    "leave": {
+        "title": "የፈቃድ አስተዳደር",
+        "subtitle": "የፈቃድ ጥያቄዎችን ያስተዳድሩ እና ዕረፍትዎን ያቅዱ።",
+        "requestLeave": "ፈቃድ ይጠይቁ",
+        "historyTitle": "የእኔ የፈቃድ ታሪክ",
+        "type": "አይነት",
+        "dates": "ቀናት",
+        "days": "ቀናት ብዛት",
+        "reason": "ምክንያት",
+        "status": "ሁኔታ",
+        "to": "እስከ",
+        "calendarTitle": "የአካዳሚክ ካላንደር",
+        "semesterBreak": "የሴሚስተር እረፍት ይጀምራል",
+        "noClasses": "ምንም ትምህርት የለም። የአስተዳደር ሠራተኞች ንቁ ናቸው።",
+        "classesResume": "ትምህርት ይጀምራል",
+        "springSemester": "የፀደይ ሴሚስተር ጅማሮ።",
+        "leaveNotice": "በፈተና ሳምንታት (ከጥር 15-25) የሚቀርቡ የፈቃድ ጥያቄዎች የዲን ማረጋገጫ ያስፈልጋቸዋል።",
+        "months": {
+            "dec": "ታህ",
+            "jan": "ጥር"
+        }
+    },
+    "recruitment": {
+        "title": "ቅጥር እና ምልመላ",
+        "subtitle": "ክፍት የስራ ቦታዎችን፣ እጩዎችን እና የቅጥር ሂደቶችን ያስተዳድሩ።",
+        "postVacancy": "ክፍት ስራ ይለጥፉ",
+        "tabs": {
+            "jobs": "የስራ ማስታወቂያዎች",
+            "candidates": "እጩዎች",
+            "interviews": "ከፍተኛ ቃለ-ምልልሶች",
+            "hiring": "የስራ ማስጀመሪያ"
+        },
+        "activeVacancies": "ንቁ የስራ ማስታወቂያዎች",
+        "searchPlaceholder": "ስራዎችን ይፈልጉ...",
+        "applicants": "አመልካቾች",
+        "closing": "መዝጊያ",
+        "internal": "ውስጣዊ",
+        "published": "የታተመ",
+        "draft": "ረቂቅ",
+        "fullTime": "ሙሉ ግዜ",
+        "contract": "ኮንትራት",
+        "noCandidates": "ምንም እጩ አልተመረጠም",
+        "selectJob": "አመልካቾችን ለማየት እና ለመምረጥ የስራ ማስታወቂያ ይምረጡ።",
+        "upcomingInterviews": "ቀጣይ ቃለ-ምልልሶች",
+        "dec": "ታህ",
+        "onboardingPipeline": "የቅጥር ማስጀመሪያ ሂደት",
+        "viewChecklist": "የማረጋገጫ ዝርዝር ይመልከቱ",
+        "offerAccepted": "ስምምነት ተቀባይነት አግኝቷል • ተጠባባቂ ሰነዶች"
+    },
+    "aiWidget": {
+        "smartPriority": "ዘመናዊ የክፍት ስራ ቅድሚያ",
+        "aiRanked": "AI-የተመደበ የምልመላ አጣዳፊነት",
+        "viewScoringModel": "የውጤት ሞዴል ይመልከቱ",
+        "score": "ውጤት"
+    }
+}

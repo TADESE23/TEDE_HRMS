@@ -1,0 +1,84 @@
+graph TB
+    subgraph "HRMS System Boundary"
+        subgraph "Authentication"
+            UC01(Login)
+            UC02(Logout)
+            UC03(Register - Self/Admin)
+        end
+        
+        subgraph "Dashboard & Analytics"
+            UC04(View Personal Stats)
+            UC05(View Team Stats)
+            UC06(View Recruitment Stats)
+            UC07(Export Reports - CSV)
+            UC08(View System Activity)
+            UC13(Update System Stats)
+        end
+        
+        subgraph "Employee Management"
+            UC09(View All Employees)
+            UC12(View Employee Profile)
+            UC10(Create Employee)
+            UC11(Delete Employee)
+            UC23(Update Employee)
+        end
+        
+        subgraph "Leave Management"
+            UC14(View Leave Balance)
+            UC15(Approve/Reject Leave)
+            UC16(Apply for Leave)
+        end
+        
+        subgraph "Recruitment"
+            UC17(Manage Job Posts)
+            UC18(View Applicants)
+            UC19(Schedule Interviews)
+            UC20(Expedite Interviews)
+        end
+        
+        subgraph "AI Features"
+            UC21(AI Candidate Scoring)
+            UC22(AI HR Prediction Insights)
+        end
+    end
+    
+    User((User)) --> UC01
+    User --> UC03
+    User --> UC02
+    
+    Employee((Employee)) --> UC01
+    Employee --> UC02
+    Employee --> UC04
+    Employee --> UC12
+    Employee --> UC14
+    Employee --> UC16
+    Employee --> UC23
+    
+    Manager((Manager)) --> UC05
+    Manager --> UC07
+    Manager --> UC15
+    
+    Recruiter((Recruiter)) --> UC06
+    Recruiter --> UC07
+    Recruiter --> UC17
+    Recruiter --> UC18
+    Recruiter --> UC19
+    Recruiter --> UC20
+    Recruiter --> UC21
+    
+    HROfficer((HR Officer)) --> UC03
+    HROfficer --> UC08
+    HROfficer --> UC09
+    HROfficer --> UC10
+    HROfficer --> UC13
+    HROfficer --> UC22
+    HROfficer --> UC23
+    
+    Admin((System Admin)) --> UC11
+    Admin --> UC22
+    
+    Employee -.->|inherits| User
+    Manager -.->|inherits| Employee
+    Recruiter -.->|inherits| Employee
+    HROfficer -.->|inherits| Employee
+    Admin -.->|inherits| HROfficer
