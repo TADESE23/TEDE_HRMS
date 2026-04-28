@@ -1,5 +1,6 @@
 import { FileText, BarChart2, PieChart, Users, TrendingUp, AlertCircle, BookOpen, X } from "lucide-react";
 import { dashboardService } from "../services/dashboardService";
+import { DepartmentChart } from "../components/dashboard/DepartmentChart";
 import { useState } from "react";
 
 export default function Reports() {
@@ -87,11 +88,17 @@ export default function Reports() {
                             </button>
                         </div>
                         <div className="p-6 flex-1 bg-gray-50 dark:bg-gray-900 flex items-center justify-center min-h-[300px]">
-                            <div className="text-center">
-                                <BarChart2 className="w-16 h-16 text-primary-300 mx-auto mb-4" />
-                                <p className="text-gray-600 dark:text-gray-400">Detailed visualization for <strong>{selectedReport}</strong></p>
-                                <p className="text-sm text-gray-500 mt-2">Full historical charts are available on the main Dashboard view.</p>
-                            </div>
+                            {selectedReport === "Headcount per Department" ? (
+                                <div className="w-full h-full min-h-[300px] bg-white dark:bg-gray-800 p-4 rounded-xl">
+                                    <DepartmentChart />
+                                </div>
+                            ) : (
+                                <div className="text-center">
+                                    <BarChart2 className="w-16 h-16 text-primary-300 mx-auto mb-4" />
+                                    <p className="text-gray-600 dark:text-gray-400">Detailed visualization for <strong>{selectedReport}</strong></p>
+                                    <p className="text-sm text-gray-500 mt-2">Full historical charts are available on the main Dashboard view.</p>
+                                </div>
+                            )}
                         </div>
                         <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3 bg-white dark:bg-gray-800">
                             <button onClick={() => setSelectedReport(null)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">Close</button>
