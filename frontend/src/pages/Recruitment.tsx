@@ -1,13 +1,112 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Briefcase, Users, UserCheck, Calendar, Plus, Search } from "lucide-react";
 import { Badge } from "../components/ui/Badge";
 import { cn } from "../utils/cn";
 import { RecruitmentOptimizationWidget } from "../components/ai/RecruitmentOptimizationWidget";
 import { useTranslation } from "react-i18next";
+import { VacancyForm } from "../components/recruitment/VacancyForm";
+import { CandidateCVForm } from "../components/recruitment/CandidateCVForm";
+import api from "../services/api";
+
+interface Vacancy {
+    id: number;
+    title: string;
+    department: string;
+    type: string;
+    status: string;
+    closing_date: string;
+    created_at: string;
+    posted_by_email?: string;
+    responsible_role?: string;
+}
+
 
 export default function Recruitment() {
     const { t } = useTranslation();
     const [activeTab, setActiveTab] = useState("jobs");
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [vacancies, setVacancies] = useState<Vacancy[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedVacancyId, setSelectedVacancyId] = useState<number | null>(null);
+    const [selectedVacancyTitle, setSelectedVacancyTitle] = useState<string>("");
+
+
+    // Candidate States
+    const [isCandidateFormOpen, setIsCandidateFormOpen] = useState(false);
+    const [candidates, setCandidates] = useState<any[]>([]);
+    const [isCandidateLoading, setIsCandidateLoading] = useState(false);
+
+    useEffect(() => {
+        fetchVacancies();
+        fetchCandidates();
+    }, []);
+
+    const fetchCandidates = async () => {
+        try {
+            setIsCandidateLoading(true);
+            const response = await api.get('/recruitment/candidates');
+            if (response.data.success) {
+                setCandidates(response.data.data);
+            }
+        } catch (error) {
+            console.error('Failed to fetch candidates', error);
+        } finally {
+            setIsCandidateLoading(false);
+        }
+    };
+
+    const handleUploadCV = async (data: FormData) => {
+        try {
+            setIsSubmitting(true);
+            const response = await api.post('/recruitment/candidates', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            if (response.data.success) {
+                setCandidates([response.data.data, ...candidates]);
+                setIsCandidateFormOpen(false);
+            }
+        } catch (error) {
+            console.error('Failed to upload CV', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const fetchVacancies = async () => {
+        try {
+            setIsLoading(true);
+            const response = await api.get('/recruitment/vacancies');
+            if (response.data.success) {
+                setVacancies(response.data.data);
+                if (response.data.data.length > 0 && !selectedVacancyId) {
+                    setSelectedVacancyId(response.data.data[0].id);
+                    setSelectedVacancyTitle(response.data.data[0].title);
+                }
+            }
+
+        } catch (error) {
+            console.error('Failed to fetch vacancies', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCreateVacancy = async (data: any) => {
+        try {
+            setIsSubmitting(true);
+            const response = await api.post('/recruitment/vacancies', data);
+            if (response.data.success) {
+                setVacancies([response.data.data, ...vacancies]);
+                setIsFormOpen(false);
+            }
+        } catch (error) {
+            console.error('Failed to create vacancy', error);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
     // ... existing code ...
     const tabs = [
         { id: "jobs", label: t('recruitment.tabs.jobs'), icon: Briefcase },
@@ -26,7 +125,10 @@ export default function Recruitment() {
                     </p>
                 </div>
                 {activeTab === "jobs" && (
-                    <button className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+                    <button
+                        onClick={() => setIsFormOpen(true)}
+                        className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                    >
                         <Plus className="w-4 h-4" />
                         {t('recruitment.postVacancy')}
                     </button>
@@ -70,48 +172,126 @@ export default function Recruitment() {
                                 </div>
                                 {/* Job Items */}
                                 <div className="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <div className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors flex justify-between items-start">
-                                        <div>
-                                            <h4 className="text-lg font-medium text-primary-600">Senior Lecturer - Computer Science</h4>
-                                            <p className="text-sm text-gray-500 mt-1">Faculty of Informatics • {t('recruitment.fullTime')}</p>
-                                            <div className="flex gap-2 mt-2">
-                                                <Badge variant="info">{t('recruitment.internal')}</Badge>
-                                                <Badge variant="success">{t('recruitment.published')}</Badge>
+                                    {isLoading ? (
+                                        <div className="p-6 text-center text-gray-500">Loading vacancies...</div>
+                                    ) : vacancies.length === 0 ? (
+                                        <div className="p-6 text-center text-gray-500">No active vacancies found.</div>
+                                    ) : (
+                                        vacancies.map((vacancy) => (
+                                            <div 
+                                                key={vacancy.id} 
+                                                onClick={() => {
+                                                    setSelectedVacancyId(vacancy.id);
+                                                    setSelectedVacancyTitle(vacancy.title);
+                                                }}
+                                                className={cn(
+                                                    "p-6 transition-colors flex justify-between items-start cursor-pointer border-l-4",
+                                                    selectedVacancyId === vacancy.id 
+                                                        ? "bg-primary-50 dark:bg-primary-900/10 border-primary-500" 
+                                                        : "hover:bg-gray-50 dark:hover:bg-gray-700/30 border-transparent divide-y divide-gray-200 dark:divide-gray-700"
+                                                )}
+                                            >
+                                                <div>
+                                                    <h4 className={cn("text-lg font-medium", selectedVacancyId === vacancy.id ? "text-primary-700" : "text-primary-600")}>{vacancy.title}</h4>
+                                                    <p className="text-sm text-gray-500 mt-1">{vacancy.department} • {t(`recruitment.${vacancy.type.replace(/\s+/g, '').replace(/^./, str => str.toLowerCase())}`, vacancy.type)}</p>
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        <Badge variant={vacancy.status === 'Published' ? 'success' : vacancy.status === 'Draft' ? 'warning' : 'info'}>
+                                                            {t(`recruitment.${vacancy.status.toLowerCase()}`, vacancy.status)}
+                                                        </Badge>
+                                                        {vacancy.posted_by_email && (
+                                                            <Badge variant="default" className="text-[10px]">
+                                                                Posted by: {vacancy.posted_by_email}
+                                                            </Badge>
+                                                        )}
+
+                                                        {vacancy.responsible_role && (
+                                                            <Badge variant="info" className="text-[10px]">
+                                                                Role: {vacancy.responsible_role}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-2xl font-bold text-gray-900 dark:text-white">-</p>
+                                                    <p className="text-xs text-gray-500">{t('recruitment.applicants')}</p>
+                                                    <p className="text-xs text-gray-400 mt-2">{t('recruitment.closing')}: {new Date(vacancy.closing_date).toLocaleDateString()}</p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-2xl font-bold text-gray-900 dark:text-white">12</p>
-                                            <p className="text-xs text-gray-500">{t('recruitment.applicants')}</p>
-                                            <p className="text-xs text-gray-400 mt-2">{t('recruitment.closing')}: {t('recruitment.dec')} 30</p>
-                                        </div>
-                                    </div>
-                                    <div className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors flex justify-between items-start">
-                                        <div>
-                                            <h4 className="text-lg font-medium text-primary-600">HR Assistant</h4>
-                                            <p className="text-sm text-gray-500 mt-1">Human Resources • {t('recruitment.contract')}</p>
-                                            <div className="flex gap-2 mt-2">
-                                                <Badge variant="warning">{t('recruitment.draft')}</Badge>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-2xl font-bold text-gray-900 dark:text-white">-</p>
-                                            <p className="text-xs text-gray-500">{t('recruitment.applicants')}</p>
-                                        </div>
-                                    </div>
+                                        ))
+
+                                    )}
                                 </div>
                             </div>
                         </div>
                         <div className="lg:col-span-1">
-                            <RecruitmentOptimizationWidget />
+                            <RecruitmentOptimizationWidget 
+                                vacancyId={selectedVacancyId || 1} 
+                                vacancyTitle={selectedVacancyTitle} 
+                            />
                         </div>
+
                     </div>
                 )}
 
                 {activeTab === "candidates" && (
-                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center">
-                        <Users className="mx-auto h-12 w-12 text-gray-300" />
-                        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">{t('recruitment.noCandidates')}</h3>
-                        <p className="mt-1 text-sm text-gray-500">{t('recruitment.selectJob')}</p>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Applicant Pipeline</h3>
+                            <button
+                                onClick={() => setIsCandidateFormOpen(true)}
+                                className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 text-sm"
+                            >
+                                <Plus className="w-4 h-4" />
+                                {t('Upload Applicant CV')}
+                            </button>
+                        </div>
+                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                                {isCandidateLoading ? (
+                                    <div className="p-6 text-center text-gray-500">Loading candidates...</div>
+                                ) : candidates.length === 0 ? (
+                                    <div className="p-8 text-center">
+                                        <Users className="mx-auto h-12 w-12 text-gray-300" />
+                                        <h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-white">No Candidates Found</h3>
+                                        <p className="mt-1 text-sm text-gray-500">Upload CVs to begin tracking applicants.</p>
+                                    </div>
+                                ) : (
+                                    candidates.map((candidate) => (
+                                        <div key={candidate.id} className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors flex justify-between items-center">
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-10 w-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold">
+                                                    {candidate.first_name?.[0]}{candidate.last_name?.[0]}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-medium text-gray-900 dark:text-white">
+                                                        {candidate.first_name} {candidate.last_name}
+                                                    </h4>
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <p className="text-xs font-semibold text-primary-600 bg-primary-50 px-2 py-0.5 rounded">
+                                                            {candidate.vacancy_title || 'General Pool'}
+                                                        </p>
+                                                        <span className="text-xs text-gray-400">•</span>
+                                                        <p className="text-xs text-gray-500 max-w-md truncate">
+                                                            {candidate.skills ? candidate.skills : 'No skills listed'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div className="text-right flex gap-3 items-center">
+                                                {candidate.cv_file_path && (
+                                                    <Badge variant="info">CV Attached</Badge>
+                                                )}
+                                                <Badge variant={candidate.prediction_label === 'High' ? 'success' : 'default'}>
+                                                    AI Score: {candidate.ai_match_score || 'N/A'}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -154,6 +334,19 @@ export default function Recruitment() {
                     </div>
                 )}
             </div>
+
+            <VacancyForm
+                isOpen={isFormOpen}
+                onClose={() => setIsFormOpen(false)}
+                onSubmit={handleCreateVacancy}
+                isSubmitting={isSubmitting}
+            />
+            <CandidateCVForm
+                isOpen={isCandidateFormOpen}
+                onClose={() => setIsCandidateFormOpen(false)}
+                onSubmit={handleUploadCV}
+                isSubmitting={isSubmitting}
+            />
         </div>
     );
 }

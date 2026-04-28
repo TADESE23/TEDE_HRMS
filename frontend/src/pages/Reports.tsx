@@ -1,4 +1,5 @@
 import { FileText, BarChart2, PieChart, Users, TrendingUp, AlertCircle, BookOpen } from "lucide-react";
+import { dashboardService } from "../services/dashboardService";
 
 export default function Reports() {
     const reports = [
@@ -12,6 +13,26 @@ export default function Reports() {
         { title: "Staff Qualification", description: "PhD, Masters, Degree holders count.", icon: BookOpen },
         { title: "Teaching Load Summary", description: "Workload distribution per department.", icon: BookOpen },
     ];
+
+    const handleView = (title: string) => {
+        alert(`Fetching detailed view for: ${title}... (Note: Full charts are natively available on the main Dashboard)`);
+    };
+
+    const handleExport = async (title: string) => {
+        try {
+            const blob = await dashboardService.exportReport();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/\s+/g, '_').toLowerCase()}_report.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err: any) {
+            alert(`Export Failed: ${err.message}`);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -35,9 +56,19 @@ export default function Reports() {
                         </div>
                         <p className="text-sm text-gray-500 mb-4">{report.description}</p>
                         <div className="flex gap-2">
-                            <button className="text-sm font-medium text-primary-600 hover:text-primary-800">View Report</button>
+                            <button 
+                                onClick={() => handleView(report.title)}
+                                className="text-sm font-medium text-primary-600 hover:text-primary-800"
+                            >
+                                View Report
+                            </button>
                             <span className="text-gray-300">|</span>
-                            <button className="text-sm font-medium text-gray-500 hover:text-gray-700">Export CSV</button>
+                            <button 
+                                onClick={() => handleExport(report.title)}
+                                className="text-sm font-medium text-gray-500 hover:text-gray-700"
+                            >
+                                Export CSV
+                            </button>
                         </div>
                     </div>
                 ))}

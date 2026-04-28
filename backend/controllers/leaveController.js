@@ -49,7 +49,7 @@ exports.requestLeave = async (req, res) => {
 
         const [result] = await db.query(
             `INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, status)
-             VALUES (?, ?, ?, ?, ?, 'Pending')`,
+             VALUES (?, ?, ?, ?, ?, 'Pending_HoD')`,
             [employeeId, leaveType, startDate, endDate, reason]
         );
 
@@ -63,9 +63,9 @@ exports.requestLeave = async (req, res) => {
 exports.updateLeaveStatus = async (req, res) => {
     try {
         const id = req.params.id;
-        const { status, comments } = req.body; // Approved, Rejected
+        const { status, comments } = req.body; // Pending_Dean, Approved, Rejected
 
-        if (!['Approved', 'Rejected'].includes(status)) {
+        if (!['Pending_Dean', 'Approved', 'Rejected'].includes(status)) {
             return res.status(400).json({ message: "Invalid status" });
         }
 

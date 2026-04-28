@@ -48,8 +48,26 @@ const isHR = (req, res, next) => {
     }
 };
 
+const isHoD = (req, res, next) => {
+    if (req.user && (req.user.role === 'hod' || req.user.role === 'dean' || req.user.role === 'admin')) {
+        next();
+    } else {
+        res.status(403).json({ message: 'Require HoD, Dean, or Admin Role!' });
+    }
+};
+
+const isDean = (req, res, next) => {
+    if (req.user && (req.user.role === 'dean' || req.user.role === 'admin')) {
+        next();
+    } else {
+        res.status(403).json({ message: 'Require Dean or Admin Role!' });
+    }
+};
+
 module.exports = {
     verifyToken,
     isAdmin,
-    isHR
+    isHR,
+    isHoD,
+    isDean
 };

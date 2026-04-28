@@ -20,11 +20,18 @@ import Disciplinary from "../pages/Disciplinary";
 import Separation from "../pages/Separation";
 import Academic from "../pages/Academic";
 import Housing from "../pages/Housing";
+import PublicJobs from "../pages/PublicJobs";
+import JobApply from "../pages/JobApply";
+
 
 export function AppRoutes() {
     return (
         <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/jobs" element={<PublicJobs />} />
+            <Route path="/jobs/apply/:id" element={<JobApply />} />
+
+
 
             <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Briefcase } from "lucide-react";
+
 import { useState } from "react";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
@@ -95,6 +96,31 @@ export default function Login() {
                             </Button>
                         </div>
                     </form>
+
+                    <div className="mt-6">
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-300"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white text-gray-500">
+                                    Looking for opportunities?
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="mt-6">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                className="w-full flex justify-center gap-2"
+                                onClick={() => navigate("/jobs")}
+                            >
+                                <Briefcase className="h-5 w-5 text-gray-400" />
+                                View Job Openings
+                            </Button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

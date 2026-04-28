@@ -8,7 +8,29 @@ export interface Forecast {
     confidence_score: string;
 }
 
+export interface RankedCandidate {
+    applicant_id: number;
+    score: number;
+    name: string;
+    skills_matched: string;
+}
+
 export const aiService = {
+    rankCandidates: async (vacancyId: number): Promise<RankedCandidate[]> => {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/rank-candidates/${vacancyId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to rank candidates');
+        }
+
+        return response.json();
+    },
+
     getForecasts: async (): Promise<Forecast[]> => {
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_URL}/forecasts`, {
@@ -36,5 +58,21 @@ export const aiService = {
         if (!response.ok) {
             throw new Error('Failed to generate forecasts');
         }
+    },
+
+    getTurnoverRisk: async (): Promise<any[]> => {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/turnover-risk`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch turnover risk data');
+        }
+
+        const data = await response.json();
+        return data.data; // The endpoint returns { success: true, data: [...] }
     }
 };

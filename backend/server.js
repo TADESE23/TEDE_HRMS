@@ -17,6 +17,7 @@ const leaveRoutes = require('./routes/leaveRoutes');
 const documentRoutes = require('./routes/documentRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const recruitmentRoutes = require('./routes/recruitmentRoutes');
 const apiRoutes = require('./api'); // Main API aggregator if needed
 
 // Route Middleware
@@ -26,6 +27,7 @@ app.use('/api/leaves', leaveRoutes);
 app.use('/api/documents', documentRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/recruitment', recruitmentRoutes);
 app.use('/api', apiRoutes); // General API routes
 
 // Root Route

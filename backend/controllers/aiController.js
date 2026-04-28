@@ -155,3 +155,127 @@ exports.generateForecasts = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.rankCandidates = async (req, res) => {
+    try {
+        const { vacancyId } = req.params;
+        
+        // In a real scenario, we would fetch candidates from the DB based on vacancyId.
+        // For this AI integration, we fetch all candidates and map their data for the AI server.
+        // Fetch candidates for this vacancy
+        const [candidates] = await db.query('SELECT * FROM candidates WHERE vacancy_id = ?', [vacancyId]);
+        
+        // Fetch vacancy details to compare requirements
+        const [vacancies] = await db.query('SELECT * FROM vacancies WHERE id = ?', [vacancyId]);
+        const vacancy = vacancies[0];
+
+        if (!vacancy) {
+            return res.status(404).json({ message: "Vacancy not found" });
+        }
+
+        // Prepare payload for AI Server
+        const payload = candidates.map(c => {
+            // Skill matching (simple heuristic for education match)
+            const eduLevels = ["High School", "Diploma", "Bachelor's Degree", "Master's Degree", "PhD"];
+            const applicantEduIndex = eduLevels.indexOf(c.education_level);
+            
+            // Assume most jobs want at least Bachelor's (index 2)
+            const educationMatch = applicantEduIndex >= 2 ? 1 : 0.5;
+
+            // Simplified experience gap: assume 3 years required if not specified
+            const experienceGap = Math.max(0, 3 - (c.years_of_experience || 0));
+
+            return {
+                applicant_id: c.id,
+                applicant_name: `${c.first_name} ${c.last_name}`,
+                applicant_skills: c.skills ? c.skills.split(',').map(s => s.trim()) : [],
+                job_skills: vacancy.requirements ? vacancy.requirements.split(',').map(s => s.trim()) : ["communication", "teamwork"],
+                education_match: educationMatch,
+                experience_gap: experienceGap,
+                salary_fit: 0.8, // Default if no vacancy budget info
+                interview_score: 85 // Application phase default
+            };
+        });
+
+
+        // Handle empty case
+        if (payload.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        // Send to Flask AI Server over updated Port 5001
+        const aiResponse = await fetch('http://127.0.0.1:5001/rank_candidates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!aiResponse.ok) {
+            throw new Error(`AI Server error: ${aiResponse.statusText}`);
+        }
+
+        const rankedData = await aiResponse.json();
+
+        // Join the returned ranked data and scores with original candidate details
+        const enrichedResults = rankedData.map(aiResult => {
+            const originalCandidate = payload.find(p => p.applicant_id === aiResult.applicant_id);
+            return {
+                ...aiResult,
+                name: originalCandidate.applicant_name,
+                skills_matched: aiResult.skill_score ? (aiResult.skill_score * 100).toFixed(0) + '%' : 'N/A'
+            };
+        });
+
+        res.status(200).json(enrichedResults);
+
+    } catch (error) {
+        console.error("Error ranking candidates via AI:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getTurnoverRisk = async (req, res) => {
+    try {
+        const [employees] = await db.query('SELECT * FROM employees WHERE status = "Active"');
+
+        // Simple heuristic to calculate turnover risk (standing in for Python Machine Learning for the demo)
+        const atRiskEmployees = employees.map(emp => {
+            let score = 0;
+            let reasons = [];
+
+            if (emp.employment_type === 'Contract') {
+                score += 40;
+                reasons.push('Contract role (lower stability)');
+            }
+            
+            // Time in company
+            const yearsJoined = (new Date() - new Date(emp.date_of_joining)) / (1000 * 60 * 60 * 24 * 365);
+            if (yearsJoined > 3 && (emp.role.includes('Assistant') || emp.role.includes('Clerk'))) {
+                score += 35;
+                reasons.push('Stagnant role progression (3+ yrs)');
+            } else if (yearsJoined < 0.5) {
+                score += 15;
+                reasons.push('New hire orientation period');
+            }
+
+            if (emp.department === 'Computer Science' || emp.department === 'Software Engineering') {
+                score += 20;
+                reasons.push('High market demand for skills');
+            }
+
+            return {
+                id: emp.id,
+                name: `${emp.first_name} ${emp.last_name}`,
+                role: emp.role,
+                risk: Math.min(score > 0 ? score + Math.floor(Math.random() * 10) : Math.floor(Math.random() * 20), 95) + '%',
+                riskScore: score,
+                reason: reasons.length > 0 ? reasons.join(', ') : 'General engagement drops'
+            };
+        }).filter(e => e.riskScore > 35).sort((a, b) => b.riskScore - a.riskScore).slice(0, 5);
+
+        res.status(200).json({ success: true, data: atRiskEmployees });
+    } catch (error) {
+        console.error("Error calculating turnover risk:", error);
+        res.status(500).json({ message: error.message });
+    }
+};
