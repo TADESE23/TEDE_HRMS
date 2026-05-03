@@ -1,7 +1,14 @@
 import { GraduationCap, BookOpen, Award, Layers } from "lucide-react";
 import { Badge } from "../../ui/Badge";
 
-export function AcademicInfo() {
+interface AcademicInfoProps {
+    employee: any;
+}
+
+export function AcademicInfo({ employee }: AcademicInfoProps) {
+    const ac = employee?.academic_profile || {};
+    const getDept = () => employee?.department_name || employee?.department || 'Unassigned';
+
     return (
         <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -12,8 +19,8 @@ export function AcademicInfo() {
                         </div>
                         <h4 className="text-sm font-semibold text-blue-900">Current Rank</h4>
                     </div>
-                    <p className="text-2xl font-bold text-blue-900">Associate Professor</p>
-                    <p className="text-xs text-blue-600 mt-1">Since Sept 2022</p>
+                    <p className="text-2xl font-bold text-blue-900">{ac.rank || ac.academic_rank || 'N/A'}</p>
+                    <p className="text-xs text-blue-600 mt-1">Verified Academic Status</p>
                 </div>
 
                 <div className="bg-purple-50 p-6 rounded-xl border border-purple-100">
@@ -23,8 +30,8 @@ export function AcademicInfo() {
                         </div>
                         <h4 className="text-sm font-semibold text-purple-900">Department</h4>
                     </div>
-                    <p className="text-2xl font-bold text-purple-900">Computer Science</p>
-                    <p className="text-xs text-purple-600 mt-1">Faculty of Informatics</p>
+                    <p className="text-2xl font-bold text-purple-900 line-clamp-1">{getDept()}</p>
+                    <p className="text-xs text-purple-600 mt-1">Primary Affiliation</p>
                 </div>
 
                 <div className="bg-green-50 p-6 rounded-xl border border-green-100">
@@ -34,8 +41,8 @@ export function AcademicInfo() {
                         </div>
                         <h4 className="text-sm font-semibold text-green-900">Specialization</h4>
                     </div>
-                    <p className="text-2xl font-bold text-green-900">AI & Machine Learning</p>
-                    <p className="text-xs text-green-600 mt-1">PhD from Addis Ababa University</p>
+                    <p className="text-2xl font-bold text-green-900 line-clamp-1">{ac.specialization || 'Not Specified'}</p>
+                    <p className="text-xs text-green-600 mt-1">{ac.highest_degree || 'Unknown Degree'}</p>
                 </div>
             </div>
 
@@ -48,27 +55,18 @@ export function AcademicInfo() {
                     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                         <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                             <span className="text-sm font-medium text-gray-700">Recent Publications</span>
-                            <Badge variant="info">Total: 12</Badge>
+                            <Badge variant="info">Total: {ac.total_publications || 0}</Badge>
                         </div>
                         <div className="divide-y divide-gray-100">
-                            <div className="p-4 hover:bg-gray-50 transition-colors">
-                                <p className="text-sm font-medium text-primary-600 line-clamp-1">
-                                    "Deep Learning Applications in Agriculture: A Case Study of Ethiopian Crop Diseases"
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">IEEE Access • 2024</p>
-                            </div>
-                            <div className="p-4 hover:bg-gray-50 transition-colors">
-                                <p className="text-sm font-medium text-primary-600 line-clamp-1">
-                                    "Optimizing Network Traffic in Rural Campus Environments"
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">African Journal of Computing • 2023</p>
-                            </div>
-                            <div className="p-4 hover:bg-gray-50 transition-colors">
-                                <p className="text-sm font-medium text-primary-600 line-clamp-1">
-                                    "Ethical AI Frameworks for Developing Nations"
-                                </p>
-                                <p className="text-xs text-gray-500 mt-1">Conference on AI Ethics • 2023</p>
-                            </div>
+                            {ac.total_publications > 0 ? (
+                                <div className="p-4">
+                                    <p className="text-sm text-gray-600">Publications are logged in the research registry. Total reported: {ac.total_publications}.</p>
+                                </div>
+                            ) : (
+                                <div className="p-4">
+                                    <p className="text-sm text-gray-500">No publications recorded.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -81,29 +79,11 @@ export function AcademicInfo() {
                     <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
                         <div className="p-4 border-b border-gray-100 bg-gray-50 flex justify-between items-center">
                             <span className="text-sm font-medium text-gray-700">Courses</span>
-                            <Badge variant="warning">12 Credit Hours</Badge>
+                            <Badge variant="warning">Pending Sync</Badge>
                         </div>
                         <div className="divide-y divide-gray-100">
-                            <div className="p-4 flex justify-between items-center">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">Introduction to AI</p>
-                                    <p className="text-xs text-gray-500">CS-301 • Year 3</p>
-                                </div>
-                                <Badge variant="default">4 Credits</Badge>
-                            </div>
-                            <div className="p-4 flex justify-between items-center">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">Advanced Algorithms</p>
-                                    <p className="text-xs text-gray-500">CS-402 • Year 4</p>
-                                </div>
-                                <Badge variant="default">4 Credits</Badge>
-                            </div>
-                            <div className="p-4 flex justify-between items-center">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-900">MSc Thesis Supervision</p>
-                                    <p className="text-xs text-gray-500">Postgraduate</p>
-                                </div>
-                                <Badge variant="default">4 Credits</Badge>
+                            <div className="p-4">
+                                <p className="text-sm text-gray-500">Course loads are fetched from the Academic Registry.</p>
                             </div>
                         </div>
                     </div>

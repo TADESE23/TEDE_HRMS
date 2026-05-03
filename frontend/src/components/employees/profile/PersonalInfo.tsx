@@ -1,23 +1,43 @@
 import { useRef } from "react";
 import { Mail, Phone, MapPin, Globe, User, Camera } from "lucide-react";
 import { useAuth } from "../../../context/AuthContext";
+import { employeeService } from "../../../services/employeeService";
 
-export function PersonalInfo() {
-    const { user, updateProfilePhoto } = useAuth();
+interface PersonalInfoProps {
+    employee: any;
+}
+
+export function PersonalInfo({ employee }: PersonalInfoProps) {
+    const { updateProfilePhoto } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handlePhotoClick = () => {
         fileInputRef.current?.click();
     };
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
-        if (file) {
-            // Mock upload: create a local object URL
-            const imageUrl = URL.createObjectURL(file);
-            updateProfilePhoto(imageUrl);
+        if (file && employee?.id) {
+            try {
+                const response = await employeeService.updateProfilePhoto(employee.id, file);
+                // If it's the current user's profile, update the auth context as well
+                if (user?.id === employee.user_id) {
+                    updateProfilePhoto(response.photo_url);
+                }
+                // Refresh to show the new photo
+                window.location.reload();
+            } catch (error) {
+                console.error("Failed to upload photo", error);
+            }
         }
     };
+
+    const getInitials = () => {
+        return `${(employee?.first_name || '').charAt(0)}${(employee?.last_name || '').charAt(0)}`.toUpperCase();
+    };
+
+    const getDept = () => employee?.department_name || employee?.department || 'Unassigned';
+    const getRole = () => employee?.role || employee?.staff_category || 'Unassigned';
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -25,10 +45,14 @@ export function PersonalInfo() {
                 <div className="flex flex-col items-center p-4 border border-gray-100 rounded-lg bg-gray-50">
                     <div className="relative group cursor-pointer" onClick={handlePhotoClick}>
                         <div className="h-32 w-32 rounded-full flex items-center justify-center border-4 border-white shadow-sm overflow-hidden bg-primary-100 text-3xl font-bold text-primary-600 mb-4">
-                            {user?.photoUrl ? (
-                                <img src={user.photoUrl} alt={user.name} className="h-full w-full object-cover" />
+                            {employee?.photo_url ? (
+                                <img 
+                                    src={`http://localhost:5000${employee.photo_url}`} 
+                                    alt={employee.first_name} 
+                                    className="h-full w-full object-cover"
+                                />
                             ) : (
-                                <span>{user?.name ? user.name.charAt(0) : "U"}</span>
+                                <span>{getInitials() || "U"}</span>
                             )}
                         </div>
                         <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity mb-4">
@@ -43,9 +67,9 @@ export function PersonalInfo() {
                         />
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-900">{user?.name || "Dr. Abebe Bikila"}</h3>
-                    <p className="text-sm text-gray-500">Associate Professor</p>
-                    <p className="text-xs text-gray-400 mt-1">UOG-COM-2019-042</p>
+                    <h3 className="text-lg font-bold text-gray-900">{`${employee?.first_name || ''} ${employee?.last_name || ''}`}</h3>
+                    <p className="text-sm text-gray-500">{getRole()}</p>
+                    <p className="text-xs text-gray-400 mt-1">{employee?.employee_id_number}</p>
                 </div>
 
                 <div className="space-y-3">
@@ -53,15 +77,15 @@ export function PersonalInfo() {
                     <div className="space-y-2">
                         <div className="flex items-center gap-3 text-sm text-gray-600">
                             <Mail className="h-4 w-4 text-gray-400" />
-                            <span>abebe.bikila@uog.edu.et</span>
+                            <span>{employee?.email || employee?.email_personal || 'No email provided'}</span>
                         </div>
                         <div className="flex items-center gap-3 text-sm text-gray-600">
                             <Phone className="h-4 w-4 text-gray-400" />
-                            <span>+251 91 123 4567</span>
+                            <span>{employee?.phone || 'No phone provided'}</span>
                         </div>
                         <div className="flex items-center gap-3 text-sm text-gray-600">
                             <MapPin className="h-4 w-4 text-gray-400" />
-                            <span>Gondar, Ethiopia</span>
+                            <span>{employee?.address || 'Gondar, Ethiopia'}</span>
                         </div>
                     </div>
                 </div>
@@ -75,20 +99,22 @@ export function PersonalInfo() {
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-xl border border-gray-100">
                         <div>
-                            <span className="block text-xs font-medium text-gray-500 uppercase">Values</span>
-                            <p className="mt-1 text-sm font-medium text-gray-900">Ethiopian</p>
+                            <span className="block text-xs font-medium text-gray-500 uppercase">Department</span>
+                            <p className="mt-1 text-sm font-medium text-gray-900">{getDept()}</p>
                         </div>
                         <div>
                             <span className="block text-xs font-medium text-gray-500 uppercase">Date of Birth</span>
-                            <p className="mt-1 text-sm font-medium text-gray-900">12 September 1980</p>
+                            <p className="mt-1 text-sm font-medium text-gray-900">
+                                {employee?.date_of_birth ? new Date(employee.date_of_birth).toLocaleDateString() : 'Not provided'}
+                            </p>
                         </div>
                         <div>
                             <span className="block text-xs font-medium text-gray-500 uppercase">Gender</span>
-                            <p className="mt-1 text-sm font-medium text-gray-900">Male</p>
+                            <p className="mt-1 text-sm font-medium text-gray-900">{employee?.gender || 'Not specified'}</p>
                         </div>
                         <div>
-                            <span className="block text-xs font-medium text-gray-500 uppercase">Marital Status</span>
-                            <p className="mt-1 text-sm font-medium text-gray-900">Married</p>
+                            <span className="block text-xs font-medium text-gray-500 uppercase">TIN Number</span>
+                            <p className="mt-1 text-sm font-medium text-gray-900">{employee?.tin_number || 'N/A'}</p>
                         </div>
                     </div>
                 </div>
@@ -99,17 +125,8 @@ export function PersonalInfo() {
                         Emergency Contact
                     </h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-gray-50 p-6 rounded-xl border border-gray-100">
-                        <div>
-                            <span className="block text-xs font-medium text-gray-500 uppercase">Name</span>
-                            <p className="mt-1 text-sm font-medium text-gray-900">Almaz Tadesse</p>
-                        </div>
-                        <div>
-                            <span className="block text-xs font-medium text-gray-500 uppercase">Relationship</span>
-                            <p className="mt-1 text-sm font-medium text-gray-900">Spouse</p>
-                        </div>
-                        <div className="sm:col-span-2">
-                            <span className="block text-xs font-medium text-gray-500 uppercase">Phone</span>
-                            <p className="mt-1 text-sm font-medium text-gray-900">+251 91 198 7654</p>
+                        <div className="sm:col-span-2 text-center text-gray-500 text-sm py-2">
+                            Emergency contact information not available in current schema.
                         </div>
                     </div>
                 </div>

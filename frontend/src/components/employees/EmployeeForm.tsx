@@ -6,6 +6,9 @@ import { Button } from "../ui/Button";
 import { Input } from "../ui/Input";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useState, useEffect } from "react";
+import { departmentService, type Department } from "../../services/departmentService";
+import { employeeService } from "../../services/employeeService";
 
 const employeeSchema = z.object({
     firstName: z.string().min(2, "First name is required"),
@@ -24,15 +27,31 @@ type EmployeeFormData = z.infer<typeof employeeSchema>;
 interface EmployeeFormProps {
     initialData?: EmployeeFormData;
     isEditing?: boolean;
+    employeeId?: string;
 }
 
-export function EmployeeForm({ initialData, isEditing = false }: EmployeeFormProps) {
+export function EmployeeForm({ initialData, isEditing = false, employeeId }: EmployeeFormProps) {
     const navigate = useNavigate();
     const { t } = useTranslation();
+    const [departments, setDepartments] = useState<Department[]>([]);
+
+    useEffect(() => {
+        const loadDepartments = async () => {
+            try {
+                const data = await departmentService.getAllDepartments();
+                setDepartments(data);
+            } catch (err) {
+                console.error("Failed to load departments", err);
+            }
+        };
+        loadDepartments();
+    }, []);
+
     const {
         register,
         handleSubmit,
         watch,
+        setValue,
         formState: { errors, isSubmitting },
     } = useForm<EmployeeFormData>({
         resolver: zodResolver(employeeSchema),
@@ -45,11 +64,34 @@ export function EmployeeForm({ initialData, isEditing = false }: EmployeeFormPro
     const selectedRole = watch("role");
     const isAcademic = ["Lecturer", "Assistant Professor", "Associate Professor", "Professor"].includes(selectedRole);
 
+    const firstName = watch("firstName");
+    const lastName = watch("lastName");
+    const currentEmail = watch("email");
+
+    useEffect(() => {
+        // Auto-generate email only when creating new employee and fields are empty/unchanged
+        if (!isEditing && firstName && lastName && (!currentEmail || currentEmail.includes("@uog.edu.et"))) {
+            const cleanFirst = firstName.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+            const cleanLast = lastName.toLowerCase().trim().replace(/[^a-z0-9]/g, '');
+            if (cleanFirst && cleanLast) {
+                setValue("email", `${cleanFirst}.${cleanLast}@uog.edu.et`);
+            }
+        }
+    }, [firstName, lastName, isEditing, setValue]);
+
     const onSubmit = async (data: EmployeeFormData) => {
-        // Simulate API call
-        console.log("Submitting:", data);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        navigate("/employees");
+        try {
+            if (isEditing && employeeId) {
+                await employeeService.updateEmployee(employeeId, data);
+                navigate(`/employees/${employeeId}`);
+            } else {
+                await employeeService.createEmployee(data);
+                navigate("/employees");
+            }
+        } catch (error) {
+            console.error("Failed to save employee", error);
+            // Ideally show a toast notification here
+        }
     };
 
     return (
@@ -122,10 +164,9 @@ export function EmployeeForm({ initialData, isEditing = false }: EmployeeFormPro
                                 className="w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 dark:text-white"
                             >
                                 <option value="">{t('employeeForm.selectDepartment')}</option>
-                                <option value="Computer Science">Computer Science</option>
-                                <option value="Engineering">Engineering</option>
-                                <option value="Medicine">Medicine</option>
-                                <option value="Human Resources">Human Resources</option>
+                                {departments.map(dept => (
+                                    <option key={dept.id} value={dept.name}>{dept.name}</option>
+                                ))}
                             </select>
                             {errors.department && <p className="text-sm text-red-500 mt-1">{errors.department.message}</p>}
                         </div>

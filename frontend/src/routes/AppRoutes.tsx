@@ -36,10 +36,15 @@ export function AppRoutes() {
             <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="/employees" element={<Employees />} />
-                    <Route path="/employees/new" element={<EmployeeFormPage />} />
-                    <Route path="/employees/:id/edit" element={<EmployeeFormPage />} />
+                    
+                    {/* Management Only Routes */}
+                    <Route element={<ProtectedRoute allowedRoles={['admin', 'hr', 'manager']} />}>
+                        <Route path="/employees" element={<Employees />} />
+                    </Route>
+
                     <Route path="/employees/:id" element={<EmployeeProfile />} />
+                    <Route path="/employees/:id/edit" element={<EmployeeFormPage />} />
+                    <Route path="/employees/new" element={<EmployeeFormPage />} />
                     <Route path="/leave" element={<Leave />} />
                     <Route path="/leave/new" element={<LeaveForm />} />
                     <Route path="/recruitment" element={<Recruitment />} />

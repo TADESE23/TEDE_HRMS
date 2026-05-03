@@ -11,6 +11,8 @@ import { StaffForecastWidget } from "../components/ai/StaffForecastWidget";
 import { TurnoverRiskWidget } from "../components/ai/TurnoverRiskWidget";
 import { DepartmentChart } from "../components/dashboard/DepartmentChart";
 import { dashboardService, type DashboardStat } from "../services/dashboardService";
+import { employeeService } from "../services/employeeService";
+import { ProfileCompletionBanner } from "../components/employees/profile/ProfileCompletionBanner";
 import { useTranslation } from "react-i18next";
 
 const ICON_MAP: Record<string, any> = {
@@ -32,6 +34,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [employeeData, setEmployeeData] = useState<any>(null);
 
     const fetchStats = useCallback(async (isRefresh = false) => {
         try {
@@ -42,6 +45,11 @@ export default function Dashboard() {
                 dashboardService.getStats(),
                 dashboardService.getActivity()
             ]);
+
+            if (user?.role === 'employee') {
+                const me = await employeeService.getMe();
+                setEmployeeData(me);
+            }
 
             setStats(statsData);
             setActivities(activityData);
@@ -94,7 +102,9 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <div className="flex items-center gap-3">
-                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.title')}</h1>
+                        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            {user?.role === 'employee' ? `${user?.name}'s ${t('dashboard.title')}` : t('dashboard.title')}
+                        </h1>
                         <Badge variant={getRoleBadgeVariant(user?.role || "") as any} className="text-xs px-2 py-0.5 capitalize">
                             {user?.role} {t('dashboard.account')}
                         </Badge>
@@ -126,6 +136,16 @@ export default function Dashboard() {
                     <AlertCircle className="w-5 h-5" />
                     <p>{error}</p>
                     <button onClick={() => fetchStats()} className="ml-auto underline font-medium">{t('dashboard.retry')}</button>
+                </div>
+            )}
+
+            {user?.role === 'employee' && employeeData && (
+                <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+                    <ProfileCompletionBanner 
+                        employee={employeeData} 
+                        employeeId={employeeData.id} 
+                        isOwnProfile={true} 
+                    />
                 </div>
             )}
 

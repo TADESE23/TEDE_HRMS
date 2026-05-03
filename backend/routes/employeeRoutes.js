@@ -3,13 +3,18 @@ const router = express.Router();
 const employeeController = require('../controllers/employeeController');
 const { verifyToken, isHR, isAdmin } = require('../middleware/authMiddleware');
 
+// All employee routes require authentication
+router.use(verifyToken);
+
 // Public or Protected Routes
-router.get('/', verifyToken, employeeController.getAllEmployees);
-router.get('/:id', verifyToken, employeeController.getEmployeeById);
+router.get('/', employeeController.getAllEmployees);
+router.get('/me', employeeController.getMe);
+router.get('/:id', employeeController.getEmployeeById);
 
 // HR/Admin Only Operations
-router.post('/', [verifyToken, isHR], employeeController.createEmployee);
-router.put('/:id', [verifyToken, isHR], employeeController.updateEmployee);
-router.delete('/:id', [verifyToken, isAdmin], employeeController.deleteEmployee);
+router.post('/', isHR, employeeController.createEmployee);
+router.put('/:id', employeeController.updateEmployee);
+router.post('/:id/photo', employeeController.uploadPhoto, employeeController.updateProfilePhoto);
+router.delete('/:id', isAdmin, employeeController.deleteEmployee);
 
 module.exports = router;

@@ -80,9 +80,9 @@ export function Sidebar() {
             default:
                 return [
                     ...common,
-                    { name: t('sidebar.myProfile'), href: `/employees/${user?.id}`, icon: Users },
+                    { name: t('sidebar.myProfile'), href: `/employees/me`, icon: Users },
                     { name: t('sidebar.leaveRequest'), href: "/leave", icon: CalendarDays },
-                    { name: t('sidebar.academicProfile'), href: `/employees/${user?.id}?tab=academic`, icon: BookOpen },
+                    { name: t('sidebar.academicProfile'), href: `/employees/me?tab=academic`, icon: BookOpen },
                 ];
         }
     };
