@@ -77,7 +77,7 @@ export default function EmployeeProfile() {
         return <div className="p-6 text-center text-gray-500">Employee not found.</div>;
     }
 
-    const fullName = `${employee?.first_name || ''} ${employee?.last_name || ''}`.trim();
+    const fullName = `${employee?.first_name || ''} ${employee?.middle_name || ''} ${employee?.last_name || ''}`.replace(/\s+/g, ' ').trim();
 
     return (
         <div className="space-y-4">
@@ -100,7 +100,7 @@ export default function EmployeeProfile() {
                 </div>
                 <div className="flex gap-2">
                     <Button variant="outline">{t('employeeProfile.downloadCv')}</Button>
-                    {isOwnProfile && (
+                    {(isOwnProfile || isAdmin) && (
                         <Button
                             onClick={() => navigate(`/employees/${id}/edit`)}
                             className="flex items-center gap-2"

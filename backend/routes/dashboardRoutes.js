@@ -9,6 +9,15 @@ router.get('/stats', verifyToken, dashboardController.getDashboardStats);
 // Get dashboard analytics
 router.get('/analytics', verifyToken, dashboardController.getDashboardAnalytics);
 
+// Get campus metrics
+router.get('/campus-metrics', verifyToken, dashboardController.getCampusMetrics);
+
+// Get staff distribution
+router.get('/staff-distribution', verifyToken, dashboardController.getStaffDistribution);
+
+// Get rank distribution
+router.get('/rank-distribution', verifyToken, dashboardController.getRankDistribution);
+
 // Get system activity
 router.get('/activity', verifyToken, dashboardController.getSystemActivity);
 

@@ -12,6 +12,7 @@ interface AuthContextType {
     user: User | null;
     login: (email: string, password?: string) => Promise<boolean>;
     logout: () => void;
+    changePassword: (currentPassword: string, newPassword: string) => Promise<void>;
     updateProfilePhoto: (url: string) => void;
     isAuthenticated: boolean;
 }
@@ -61,6 +62,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
     };
 
+    const changePassword = async (currentPassword: string, newPassword: string) => {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:5000/api/auth/change-password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.message || 'Failed to change password');
+        }
+    };
+
     const updateProfilePhoto = (url: string) => {
         if (user) {
             setUser({ ...user, photoUrl: url });
@@ -76,7 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, updateProfilePhoto, isAuthenticated: !!user }}>
+        <AuthContext.Provider value={{ user, login, logout, changePassword, updateProfilePhoto, isAuthenticated: !!user }}>
             {children}
         </AuthContext.Provider>
     );

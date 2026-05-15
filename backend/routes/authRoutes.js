@@ -11,4 +11,6 @@ router.get('/verify', verifyToken, (req, res) => {
     res.status(200).json({ valid: true, userId: req.userId, role: req.userRole });
 });
 
+router.post('/change-password', verifyToken, authController.changePassword);
+
 module.exports = router;

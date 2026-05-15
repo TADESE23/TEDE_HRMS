@@ -1,9 +1,58 @@
-import { useState } from "react";
-import { Building2, Users, FileText, Briefcase, Network } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Building2, Users, FileText, Briefcase, Network, Plus, Loader2 } from "lucide-react";
 import { cn } from "../utils/cn";
+import { settingsService } from "../services/settingsService";
+import type { College, Job } from "../services/settingsService";
 
 export default function Settings() {
     const [activeTab, setActiveTab] = useState("organization");
+    const [colleges, setColleges] = useState<College[]>([]);
+    const [jobs, setJobs] = useState<Job[]>([]);
+    const [loading, setLoading] = useState(false);
+    
+    const [newCollegeName, setNewCollegeName] = useState("");
+    const [newDeanName, setNewDeanName] = useState("");
+    
+    useEffect(() => {
+        if (activeTab === "structure") fetchStructure();
+        if (activeTab === "jobs") fetchJobs();
+    }, [activeTab]);
+    
+    const fetchStructure = async () => {
+        setLoading(true);
+        try {
+            const data = await settingsService.getStructure();
+            setColleges(data);
+        } catch (error) {
+            console.error("Failed to load structure", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const fetchJobs = async () => {
+        setLoading(true);
+        try {
+            const data = await settingsService.getJobs();
+            setJobs(data);
+        } catch (error) {
+            console.error("Failed to load jobs", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    const handleAddCollege = async () => {
+        if (!newCollegeName) return;
+        try {
+            await settingsService.addCollege({ name: newCollegeName, dean_name: newDeanName });
+            setNewCollegeName("");
+            setNewDeanName("");
+            fetchStructure();
+        } catch (error) {
+            console.error("Failed to add college", error);
+        }
+    };
 
     const tabs = [
         { id: "organization", label: "Organization", icon: Building2 },
@@ -73,19 +122,61 @@ export default function Settings() {
                         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Colleges & Schools</h2>
                             <div className="space-y-2">
-                                {/* List Placeholder */}
-                                <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 flex justify-between">
-                                    <span>College of Computational Sciences</span>
-                                    <button className="text-primary-600 text-sm">Edit</button>
+                                {loading ? (
+                                    <div className="flex justify-center py-4"><Loader2 className="w-6 h-6 animate-spin text-primary-500" /></div>
+                                ) : (
+                                    colleges.map(college => (
+                                        <div key={college.id} className="p-3 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600 flex justify-between">
+                                            <div>
+                                                <span className="font-medium">{college.name}</span>
+                                                {college.dean_name && <span className="text-xs text-gray-500 block">Dean: {college.dean_name}</span>}
+                                            </div>
+                                            <button className="text-primary-600 text-sm">Edit</button>
+                                        </div>
+                                    ))
+                                )}
+                                <div className="mt-4 flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        placeholder="College Name" 
+                                        value={newCollegeName}
+                                        onChange={(e) => setNewCollegeName(e.target.value)}
+                                        className="text-sm p-2 border rounded flex-1 dark:bg-gray-700 dark:border-gray-600"
+                                    />
+                                    <input 
+                                        type="text" 
+                                        placeholder="Dean Name" 
+                                        value={newDeanName}
+                                        onChange={(e) => setNewDeanName(e.target.value)}
+                                        className="text-sm p-2 border rounded flex-1 dark:bg-gray-700 dark:border-gray-600"
+                                    />
+                                    <button onClick={handleAddCollege} className="bg-primary-600 text-white p-2 rounded text-sm hover:bg-primary-700 flex items-center gap-1">
+                                        <Plus className="w-4 h-4"/> Add
+                                    </button>
                                 </div>
-                                <button className="text-primary-600 text-sm font-medium">+ Add College</button>
                             </div>
                         </div>
                         <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
                             <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Departments</h2>
-                            {/* Departments Placeholder */}
-                            <p className="text-sm text-gray-500">Manage departments and assign them to colleges.</p>
-                            <button className="mt-2 text-primary-600 text-sm font-medium">+ Add Department</button>
+                            {loading ? (
+                                 <div className="flex justify-center py-4"><Loader2 className="w-6 h-6 animate-spin text-primary-500" /></div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {colleges.map(college => (
+                                        <div key={college.id}>
+                                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">{college.name}</h3>
+                                            <div className="space-y-2 pl-4 border-l-2 border-gray-100 dark:border-gray-700">
+                                                {college.departments && college.departments.length > 0 ? college.departments.map(dept => (
+                                                    <div key={dept.id} className="text-sm p-2 bg-gray-50 dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600">
+                                                        {dept.name} <span className="text-xs text-gray-400">({dept.head_of_department || 'No Head'})</span>
+                                                    </div>
+                                                )) : <p className="text-xs text-gray-400 italic">No departments</p>}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            <button className="mt-4 text-primary-600 text-sm font-medium">+ Add Department</button>
                         </div>
                     </div>
                 )}
@@ -97,11 +188,17 @@ export default function Settings() {
                             <div>
                                 <h3 className="text-md font-medium text-gray-900 dark:text-white mb-3">Job Titles</h3>
                                 <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                                    <li>Lecturer I</li>
-                                    <li>Lecturer II</li>
-                                    <li>Dean</li>
-                                    <li>Registrar</li>
-                                    <li><button className="text-primary-600 font-medium">+ Add Title</button></li>
+                                    {loading ? (
+                                         <Loader2 className="w-5 h-5 animate-spin text-primary-500 mx-auto" />
+                                    ) : (
+                                        jobs.map(job => (
+                                            <li key={job.id} className="flex justify-between items-center bg-gray-50 dark:bg-gray-700 p-2 rounded">
+                                                <span>{job.grade_name}</span>
+                                                <span className="text-xs font-semibold text-green-600">{job.base_salary} {job.currency}</span>
+                                            </li>
+                                        ))
+                                    )}
+                                    <li><button className="text-primary-600 font-medium mt-2">+ Add Grade</button></li>
                                 </ul>
                             </div>
                             <div>

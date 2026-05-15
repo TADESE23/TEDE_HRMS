@@ -25,8 +25,14 @@ export default function EmployeeFormPage() {
                     // Map backend data to form fields
                     setInitialData({
                         firstName: data.first_name,
+                        middleName: data.middle_name || "",
                         lastName: data.last_name,
-                        email: data.email || data.email_personal || "",
+                        email: data.email || "",
+                        emailPersonal: data.email_personal || "",
+                        phone: data.phone || "",
+                        dateOfBirth: data.date_of_birth ? new Date(data.date_of_birth).toISOString().split('T')[0] : "",
+                        gender: data.gender || "Male",
+                        address: data.address || "",
                         idNumber: data.employee_id_number,
                         department: data.department_name || data.department || "",
                         role: data.role || data.staff_category || "",

@@ -23,6 +23,12 @@ const academicRoutes = require('./routes/academicRoutes');
 const disciplinaryRoutes = require('./routes/disciplinaryRoutes');
 const trainingRoutes = require('./routes/trainingRoutes');
 const departmentRoutes = require('./routes/departmentRoutes');
+const settingsRoutes = require('./routes/settingsRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
+const performanceRoutes = require('./routes/performanceRoutes');
+const payrollRoutes = require('./routes/payrollRoutes');
+const housingRoutes = require('./routes/housingRoutes');
+const separationRoutes = require('./routes/separationRoutes');
 const apiRoutes = require('./api'); // Main API aggregator if needed
 
 // Route Middleware
@@ -37,6 +43,12 @@ app.use('/api/academic', academicRoutes);
 app.use('/api/disciplinary', disciplinaryRoutes);
 app.use('/api/training', trainingRoutes);
 app.use('/api/departments', departmentRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/attendance', attendanceRoutes);
+app.use('/api/performance', performanceRoutes);
+app.use('/api/payroll', payrollRoutes);
+app.use('/api/housing', housingRoutes);
+app.use('/api/separations', separationRoutes);
 app.use('/api', apiRoutes); // General API routes
 
 // Root Route

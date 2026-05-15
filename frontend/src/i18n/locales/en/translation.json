@@ -44,7 +44,8 @@
         "noActivity": "No recent activity.",
         "performanceStats": "Performance Stats",
         "departmentAnalytics": "Department Analytics",
-        "personalStatsComingSoon": "Personal Stats Coming Soon"
+        "personalStatsComingSoon": "Personal Stats Coming Soon",
+        "security": "Security"
     },
     "statsCard": {
         "fromLastMonth": "from last month"

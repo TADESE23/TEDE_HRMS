@@ -1,4 +1,5 @@
 const db = require('../DB_config/db');
+const bcrypt = require('bcryptjs');
 const path = require('path');
 const multer = require('multer');
 
@@ -116,96 +117,165 @@ exports.getEmployeeById = async (req, res) => {
     }
 };
 
+// Map HR Roles to System Roles
+const mapToSystemRole = (hrRole) => {
+    const role = hrRole.toLowerCase();
+    if (role.includes('admin')) return 'admin';
+    if (role.includes('hr') || role.includes('human resource')) return 'hr';
+    if (role.includes('head') || role.includes('manager') || role.includes('dean')) return 'manager';
+    return 'employee';
+};
+
 exports.createEmployee = async (req, res) => {
+    const connection = await db.getConnection();
     try {
+        await connection.beginTransaction();
+
         const {
-            firstName, lastName, email, idNumber,
-            department, role, status, academicRank
+            firstName, middleName, lastName, email, emailPersonal,
+            phone, dateOfBirth, gender, address,
+            idNumber, department, role, status, academicRank,
+            password // New field for onboarding
         } = req.body;
 
-        // Start transaction (simplified as separate queries for now, ideal to use TRANSACTION)
+        // 1. Create User Account automatically
+        const systemRole = mapToSystemRole(role);
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password || 'Welcome123!', salt);
+
+        const [userResult] = await connection.query(
+            'INSERT INTO users (email, password_hash, role, status) VALUES (?, ?, ?, ?)',
+            [email, hashedPassword, systemRole, 'Active']
+        );
+        const userId = userResult.insertId;
 
         // Lookup department_id
-        const [deptResult] = await db.query('SELECT id, name FROM departments WHERE name = ?', [department]);
+        const [deptResult] = await connection.query('SELECT id, name FROM departments WHERE name = ?', [department]);
         const department_id = deptResult.length > 0 ? deptResult[0].id : null;
         const department_name = deptResult.length > 0 ? deptResult[0].name : department;
 
-        // 1. Insert into employees table
-        // Mapping frontend fields to DB columns
-        const [result] = await db.query(
+        // 2. Insert into employees table linked to userId
+        const [empResult] = await connection.query(
             `INSERT INTO employees 
-            (first_name, last_name, email, employee_id_number, department, department_id, role, status, date_of_joining)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-            [firstName, lastName, email, idNumber, department_name, department_id, role, status]
+            (user_id, first_name, middle_name, last_name, email, email_personal, phone, date_of_birth, gender, address, 
+             employee_id_number, department, department_id, role, status, date_of_joining)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
+            [
+                userId, firstName, middleName, lastName, email, emailPersonal, 
+                phone, dateOfBirth, gender, address,
+                idNumber, department_name, department_id, role, status
+            ]
         );
 
-        const employeeId = result.insertId;
+        const employeeId = empResult.insertId;
 
-        // 2. If it's an academic role, insert into academic_profiles
+        // 3. If it's an academic role, insert into academic_profiles
         if (academicRank) {
-            await db.query(
+            await connection.query(
                 `INSERT INTO academic_profiles (employee_id, \`rank\`) VALUES (?, ?)`,
                 [employeeId, academicRank]
             );
         }
 
+        await connection.commit();
+
         res.status(201).json({
-            message: 'Employee created successfully',
-            id: employeeId
+            message: 'Employee onboarding successful. User account created.',
+            id: employeeId,
+            userId: userId
         });
 
     } catch (error) {
+        await connection.rollback();
         console.error("Error creating employee:", error);
         res.status(500).json({ message: error.message });
+    } finally {
+        connection.release();
     }
 };
 
 exports.updateEmployee = async (req, res) => {
     try {
         const id = req.params.id;
-        const {
-            firstName, lastName, email, idNumber,
-            department, role, status, academicRank
-        } = req.body;
-
-        // Verify ownership: Only the employee themselves can edit their own profile
-        const [emp] = await db.query('SELECT user_id FROM employees WHERE id = ?', [id]);
+        const isAdmin = ['admin', 'hr', 'HR Officer'].includes(req.user.role);
+        
+        // 1. Verify existence and permissions
+        const [emp] = await db.query('SELECT user_id, email, employee_id_number, department, role, status FROM employees WHERE id = ?', [id]);
         if (emp.length === 0) return res.status(404).json({ message: 'Employee not found' });
 
-        if (emp[0].user_id !== req.user.id) {
-            return res.status(403).json({ message: 'Forbidden: You can only edit your own profile.' });
+        const isOwner = emp[0].user_id === req.user.id;
+
+        // If not admin and not owner, deny access
+        if (!isAdmin && !isOwner) {
+            return res.status(403).json({ message: 'Forbidden: You do not have permission to edit this profile.' });
         }
 
-        // Lookup department_id
+        let {
+            firstName, middleName, lastName, email, emailPersonal,
+            phone, dateOfBirth, gender, address,
+            idNumber, department, role, status, academicRank
+        } = req.body;
+
+        // 2. If employee (non-admin), protect sensitive employment fields
+        if (!isAdmin) {
+            // Revert sensitive fields to current DB values to prevent unauthorized changes
+            email = emp[0].email;
+            idNumber = emp[0].employee_id_number;
+            department = emp[0].department;
+            role = emp[0].role;
+            status = emp[0].status;
+            // NOTE: Employees ARE allowed to edit personal info: 
+            // firstName, middleName, lastName, phone, emailPersonal, dateOfBirth, gender, address
+        }
+
+        // Lookup department_id (if department changed or for consistency)
         const [deptResult] = await db.query('SELECT id, name FROM departments WHERE name = ?', [department]);
         const department_id = deptResult.length > 0 ? deptResult[0].id : null;
         const department_name = deptResult.length > 0 ? deptResult[0].name : department;
 
-        // Update core employee details
+        // 3. Update core employee details
         await db.query(
             `UPDATE employees SET 
-            first_name = ?, last_name = ?, email = ?, 
+            first_name = ?, middle_name = ?, last_name = ?, email = ?, 
+            email_personal = ?, phone = ?, date_of_birth = ?, gender = ?, address = ?,
             employee_id_number = ?, department = ?, department_id = ?, 
             role = ?, status = ?
             WHERE id = ?`,
-            [firstName, lastName, email, idNumber, department_name, department_id, role, status, id]
+            [
+                firstName, middleName, lastName, email, 
+                emailPersonal, phone, dateOfBirth, gender, address,
+                idNumber, department_name, department_id, role, status, id
+            ]
         );
 
-        // Update or Insert academic profile if rank is provided
+        // 4. Update or Insert academic profile if rank is provided
         if (academicRank) {
             // Check if profile exists
             const [profiles] = await db.query('SELECT * FROM academic_profiles WHERE employee_id = ?', [id]);
 
+            // If not admin, they can't change their rank if it's already set or at all? 
+            // Usually rank is HR controlled. Let's protect it for non-admins.
+            if (!isAdmin && profiles.length > 0 && profiles[0].rank !== academicRank) {
+                // Ignore the change from employee
+                academicRank = profiles[0].rank;
+            }
+
             if (profiles.length > 0) {
-                await db.query(
-                    `UPDATE academic_profiles SET \`rank\` = ? WHERE employee_id = ?`,
-                    [academicRank, id]
-                );
+                if (isAdmin) { // Only admin can update existing rank
+                    await db.query(
+                        `UPDATE academic_profiles SET \`rank\` = ? WHERE employee_id = ?`,
+                        [academicRank, id]
+                    );
+                }
             } else {
-                await db.query(
-                    `INSERT INTO academic_profiles (employee_id, \`rank\`) VALUES (?, ?)`,
-                    [id, academicRank]
-                );
+                // If it doesn't exist, maybe allow initial set? 
+                // Better to restrict to Admin only as per typical HR policy.
+                if (isAdmin) {
+                    await db.query(
+                        `INSERT INTO academic_profiles (employee_id, \`rank\`) VALUES (?, ?)`,
+                        [id, academicRank]
+                    );
+                }
             }
         }
 

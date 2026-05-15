@@ -64,5 +64,32 @@ export const dashboardService = {
         });
         if (!response.ok) throw new Error('Failed to fetch activity');
         return response.json();
+    },
+
+    getCampusMetrics: async (): Promise<DashboardStat[]> => {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/campus-metrics`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch campus metrics');
+        return response.json();
+    },
+
+    getStaffDistribution: async (): Promise<{ name: string; value: number }[]> => {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/staff-distribution`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch staff distribution');
+        return response.json();
+    },
+
+    getRankDistribution: async (): Promise<{ name: string; value: number }[]> => {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/rank-distribution`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch rank distribution');
+        return response.json();
     }
 };

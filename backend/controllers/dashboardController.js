@@ -238,3 +238,58 @@ exports.getSystemActivity = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+exports.getCampusMetrics = async (req, res) => {
+    try {
+        // 1. Academic vs Admin Ratio
+        const [counts] = await db.query('SELECT staff_category, COUNT(*) as count FROM employees GROUP BY staff_category');
+        const total = counts.reduce((acc, curr) => acc + curr.count, 0);
+        const academicCount = counts.find(c => c.staff_category === 'Academic')?.count || 0;
+        const academicRatio = total > 0 ? Math.round((academicCount / total) * 100) : 0;
+
+        // 2. PhD Holders (Assuming 'Assistant Professor' and above usually have PhD or equivalent)
+        const [phdResult] = await db.query('SELECT COUNT(*) as count FROM academic_profiles WHERE `rank` IN ("Assistant Professor", "Associate Professor", "Professor")');
+        
+        // 3. Gender Balance
+        const [genderResult] = await db.query('SELECT gender, COUNT(*) as count FROM employees GROUP BY gender');
+        const femaleCount = genderResult.find(g => g.gender === 'Female')?.count || 0;
+        const femaleRatio = total > 0 ? Math.round((femaleCount / total) * 100) : 0;
+
+        // 4. Pending Recruitments
+        const [pendingCandidates] = await db.query('SELECT COUNT(*) as count FROM candidates WHERE status = "New" OR status = "Interviewing"');
+
+        res.status(200).json([
+            { title: "Academic Staff Ratio", value: `${academicRatio}%`, icon: "GraduationCap", trend: { value: "65% target", isPositive: academicRatio >= 65 } },
+            { title: "Senior Faculty", value: phdResult[0].count.toString(), icon: "Award", trend: { value: "Assistant Prof+", isPositive: true } },
+            { title: "Female Representation", value: `${femaleRatio}%`, icon: "Users", trend: { value: "45% target", isPositive: femaleRatio >= 45 } },
+            { title: "Active Applicants", value: pendingCandidates[0].count.toString(), icon: "Briefcase" },
+        ]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getStaffDistribution = async (req, res) => {
+    try {
+        const [results] = await db.query(`
+            SELECT staff_category as name, COUNT(*) as value 
+            FROM employees 
+            GROUP BY staff_category
+        `);
+        res.status(200).json(results);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+exports.getRankDistribution = async (req, res) => {
+    try {
+        const [results] = await db.query(`
+            SELECT \`rank\` as name, COUNT(*) as value 
+            FROM academic_profiles 
+            GROUP BY \`rank\`
+        `);
+        res.status(200).json(results);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

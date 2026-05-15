@@ -67,7 +67,9 @@ export function PersonalInfo({ employee }: PersonalInfoProps) {
                         />
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-900">{`${employee?.first_name || ''} ${employee?.last_name || ''}`}</h3>
+                    <h3 className="text-lg font-bold text-gray-900">
+                        {`${employee?.first_name || ''} ${employee?.middle_name || ''} ${employee?.last_name || ''}`.replace(/\s+/g, ' ').trim()}
+                    </h3>
                     <p className="text-sm text-gray-500">{getRole()}</p>
                     <p className="text-xs text-gray-400 mt-1">{employee?.employee_id_number}</p>
                 </div>
